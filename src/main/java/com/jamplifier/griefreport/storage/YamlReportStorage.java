@@ -3,9 +3,6 @@ package com.jamplifier.griefreport.storage;
 import com.jamplifier.griefreport.GriefReportPlugin;
 import com.jamplifier.griefreport.model.GriefReport;
 import com.jamplifier.griefreport.model.GriefReportStatus;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.World;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -46,17 +43,25 @@ public class YamlReportStorage implements ReportStorage {
                 double x = config.getDouble(key + ".x");
                 double y = config.getDouble(key + ".y");
                 double z = config.getDouble(key + ".z");
+                float yaw = (float) config.getDouble(key + ".yaw", 0.0D);
+                float pitch = (float) config.getDouble(key + ".pitch", 0.0D);
                 String message = config.getString(key + ".message", "");
 
                 if (reporterStr == null || worldName == null) {
                     continue;
                 }
 
-                World world = Bukkit.getWorld(worldName);
-                if (world == null) continue;
-
-                Location loc = new Location(world, x, y, z);
-                GriefReport report = new GriefReport(id, UUID.fromString(reporterStr), loc, message);
+                GriefReport report = new GriefReport(
+                        id,
+                        UUID.fromString(reporterStr),
+                        worldName,
+                        x,
+                        y,
+                        z,
+                        yaw,
+                        pitch,
+                        message
+                );
 
                 String statusStr = config.getString(key + ".status", "OPEN");
                 report.setStatus(GriefReportStatus.valueOf(statusStr));
@@ -89,13 +94,11 @@ public class YamlReportStorage implements ReportStorage {
 
         config.set(key + ".reporter", report.getReporter().toString());
         config.set(key + ".world", report.getWorldName());
-
-        Location loc = report.toLocation();
-        if (loc != null) {
-            config.set(key + ".x", loc.getX());
-            config.set(key + ".y", loc.getY());
-            config.set(key + ".z", loc.getZ());
-        }
+        config.set(key + ".x", report.getX());
+        config.set(key + ".y", report.getY());
+        config.set(key + ".z", report.getZ());
+        config.set(key + ".yaw", report.getYaw());
+        config.set(key + ".pitch", report.getPitch());
 
         config.set(key + ".message", report.getMessage());
         config.set(key + ".status", report.getStatus().name());

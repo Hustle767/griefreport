@@ -18,18 +18,22 @@ public final class MessageUtil {
     }
 
     public static void send(CommandSender sender, String key, TagResolver... extraResolvers) {
+        sender.sendMessage(buildComponent(key, extraResolvers));
+    }
+
+    public static Component buildComponent(String key, TagResolver... extraResolvers) {
         GriefReportPlugin plugin = GriefReportPlugin.getInstance();
         String path = "messages." + key;
         String raw = plugin.getConfig().getString(path);
 
         if (raw == null) {
-            // Fallback to key name if missing
             raw = "<red>Missing message key:</red> " + key;
         }
 
-        // Prefix support for MiniMessage messages
-        String prefix = plugin.getConfig().getString("messages.prefix",
-                "<gray>[<red>GriefReport</red>]</gray> ");
+        String prefix = plugin.getConfig().getString(
+                "messages.prefix",
+                "<gray>[<red>GriefReport</red>]</gray> "
+        );
         TagResolver prefixResolver = Placeholder.parsed("prefix", prefix);
 
         TagResolver resolver = TagResolver.builder()
@@ -37,19 +41,15 @@ public final class MessageUtil {
                 .resolvers(extraResolvers)
                 .build();
 
-        Component component;
-
         if (raw.contains("<")) {
             // Treat as MiniMessage
-            component = MINI.deserialize(raw, resolver);
+            return MINI.deserialize(raw, resolver);
         } else if (raw.contains("&")) {
-            // Treat as legacy & color codes (no MiniMessage placeholders here)
-            component = LEGACY.deserialize(raw);
+            // Treat as legacy & codes (no MiniMessage placeholders)
+            return LEGACY.deserialize(raw);
         } else {
-            // Plain text as MiniMessage (so we can still use placeholders)
-            component = MINI.deserialize(raw, resolver);
+            // Plain text but still run through MiniMessage for placeholders
+            return MINI.deserialize(raw, resolver);
         }
-
-        sender.sendMessage(component);
     }
 }

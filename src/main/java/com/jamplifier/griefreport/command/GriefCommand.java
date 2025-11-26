@@ -7,6 +7,9 @@ import com.jamplifier.griefreport.model.GriefReportStatus;
 import com.jamplifier.griefreport.util.MessageUtil;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.*;
@@ -91,6 +94,7 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
         }
 
         // In-game staff alert
+     // In-game staff alert
         if (plugin.getConfig().getBoolean("in-game-staff-alerts", true)) {
             TagResolver[] staffResolvers = new TagResolver[]{
                     Placeholder.unparsed("id", String.valueOf(report.getId())),
@@ -102,10 +106,18 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
                     Placeholder.unparsed("message", message.isEmpty() ? "no message" : message)
             };
 
+            Component base = MessageUtil.buildComponent("staff-report-alert", staffResolvers);
+            Component hover = MessageUtil.buildComponent("staff-report-alert-hover", staffResolvers);
+
+            Component clickable = base
+                    .hoverEvent(HoverEvent.showText(hover))
+                    .clickEvent(ClickEvent.runCommand("/grief teleport " + report.getId()));
+
             Bukkit.getOnlinePlayers().stream()
                     .filter(p -> p.hasPermission("griefreport.staff"))
-                    .forEach(p -> MessageUtil.send(p, "staff-report-alert", staffResolvers));
+                    .forEach(p -> p.sendMessage(clickable));
         }
+
 
         // Discord
         plugin.getDiscordNotifier().sendNewReport(report);
@@ -130,14 +142,54 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        // No ID -> if player: use their last report
+        // No ID -> if player: use ALL their open reports if > 1
         if (sender instanceof Player player) {
-            var opt = reportManager.getLastReportFor(player.getUniqueId());
-            if (opt.isEmpty()) {
+            var all = reportManager.getReportsByReporter(player.getUniqueId());
+
+            // Filter to non-closed
+            List<GriefReport> open = all.stream()
+                    .filter(r -> r.getStatus() != GriefReportStatus.CLOSED)
+                    .toList();
+
+            if (open.isEmpty()) {
                 MessageUtil.send(sender, "status-no-self");
                 return;
             }
-            sendStatus(sender, opt.get());
+
+            if (open.size() == 1) {
+                sendStatus(sender, open.get(0));
+                return;
+            }
+
+            // Multiple open reports -> list them
+            MessageUtil.send(sender, "status-multiple-header");
+
+            for (GriefReport report : open) {
+                int x = (int) report.getX();
+                int y = (int) report.getY();
+                int z = (int) report.getZ();
+
+                String statusStr = switch (report.getStatus()) {
+                    case OPEN -> "OPEN";
+                    case IN_PROGRESS -> "IN_PROGRESS";
+                    case CLOSED -> "CLOSED";
+                };
+
+                String msg = report.getMessage();
+                if (msg.length() > 40) {
+                    msg = msg.substring(0, 37) + "...";
+                }
+                if (msg.isEmpty()) msg = "no message";
+
+                MessageUtil.send(sender, "status-multiple-entry",
+                        Placeholder.unparsed("id", String.valueOf(report.getId())),
+                        Placeholder.unparsed("status", statusStr),
+                        Placeholder.unparsed("world", report.getWorldName()),
+                        Placeholder.unparsed("x", String.valueOf(x)),
+                        Placeholder.unparsed("y", String.valueOf(y)),
+                        Placeholder.unparsed("z", String.valueOf(z)),
+                        Placeholder.unparsed("message", msg));
+            }
         } else {
             // Console must specify an ID
             MessageUtil.send(sender, "status-console-requires-id");
@@ -145,22 +197,11 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendStatus(CommandSender sender, GriefReport report) {
-        Location loc = report.toLocation();
-        int x = loc != null ? loc.getBlockX() : 0;
-        int y = loc != null ? loc.getBlockY() : 0;
-        int z = loc != null ? loc.getBlockZ() : 0;
+        int x = (int) report.getX();
+        int y = (int) report.getY();
+        int z = (int) report.getZ();
 
-        String statusKey;
-        TagResolver statusResolver;
-
-        if (report.getStatus() == GriefReportStatus.OPEN) {
-            statusKey = "status-open";
-            statusResolver = Placeholder.parsed("status", "<green>OPEN</green>");
-        } else if (report.getStatus() == GriefReportStatus.IN_PROGRESS) {
-            statusKey = "status-in-progress";
-            statusResolver = Placeholder.parsed("status", "<gold>IN PROGRESS</gold>");
-        } else {
-            statusKey = "status-closed";
+        if (report.getStatus() == GriefReportStatus.CLOSED) {
             String closedByName = report.getClosedBy() != null
                     ? Bukkit.getOfflinePlayer(report.getClosedBy()).getName()
                     : "unknown";
@@ -168,31 +209,33 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
                     ? dateFormatter.format(report.getClosedAt())
                     : "unknown";
 
-            TagResolver closedDetailResolver = TagResolver.builder()
-                    .resolver(Placeholder.unparsed("world", report.getWorldName()))
-                    .resolver(Placeholder.unparsed("x", String.valueOf(x)))
-                    .resolver(Placeholder.unparsed("y", String.valueOf(y)))
-                    .resolver(Placeholder.unparsed("z", String.valueOf(z)))
-                    .resolver(Placeholder.unparsed("closed_by", closedByName == null ? "unknown" : closedByName))
-                    .resolver(Placeholder.unparsed("closed_at", closedAt))
-                    .build();
-
             // header line
             MessageUtil.send(sender, "status-header",
                     Placeholder.unparsed("id", String.valueOf(report.getId())),
                     Placeholder.parsed("status", "<red>CLOSED</red>"));
+
             // details line
-            MessageUtil.send(sender, statusKey, closedDetailResolver);
+            MessageUtil.send(sender, "status-closed",
+                    Placeholder.unparsed("world", report.getWorldName()),
+                    Placeholder.unparsed("x", String.valueOf(x)),
+                    Placeholder.unparsed("y", String.valueOf(y)),
+                    Placeholder.unparsed("z", String.valueOf(z)),
+                    Placeholder.unparsed("closed_by", closedByName == null ? "unknown" : closedByName),
+                    Placeholder.unparsed("closed_at", closedAt));
             return;
         }
 
-        // OPEN or IN_PROGRESS
-        TagResolver commonResolvers = TagResolver.builder()
-                .resolver(Placeholder.unparsed("id", String.valueOf(report.getId())))
-                .resolver(statusResolver)
-                .build();
+        String statusKey = (report.getStatus() == GriefReportStatus.OPEN)
+                ? "status-open"
+                : "status-in-progress";
 
-        MessageUtil.send(sender, "status-header", commonResolvers);
+        String statusTag = (report.getStatus() == GriefReportStatus.OPEN)
+                ? "<green>OPEN</green>"
+                : "<gold>IN PROGRESS</gold>";
+
+        MessageUtil.send(sender, "status-header",
+                Placeholder.unparsed("id", String.valueOf(report.getId())),
+                Placeholder.parsed("status", statusTag));
 
         MessageUtil.send(sender, statusKey,
                 Placeholder.unparsed("world", report.getWorldName()),
@@ -200,6 +243,7 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
                 Placeholder.unparsed("y", String.valueOf(y)),
                 Placeholder.unparsed("z", String.valueOf(z)));
     }
+
 
     // /grief close <id>
     private void handleClose(CommandSender sender, String[] args) {

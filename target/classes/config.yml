@@ -32,6 +32,9 @@ messages:
   status-open: "<green>OPEN</green> at <world> <x>, <y>, <z>"
   status-in-progress: "<gold>IN PROGRESS</gold> at <world> <x>, <y>, <z>"
   status-closed: "<red>CLOSED</red> by <closed_by> on <closed_at>"
+  status-multiple-header: "<prefix><yellow>Your open grief reports:</yellow>"
+  status-multiple-entry: "<gray>#<id> - <status> - <world> <x>, <y>, <z> - <message></gray>"
+
 
   # /grief list
   list-header: "<prefix><yellow>Open grief reports:</yellow>"
@@ -52,3 +55,5 @@ messages:
 
   # Misc
   usage-main: "<yellow>Usage:</yellow> /grief <report|status|close|teleport|list>"
+  staff-report-alert-hover: "<gray>Click to teleport to report #<id>.</gray>"
+
