@@ -29,7 +29,7 @@ public class GriefReport {
         this.x = location.getX();
         this.y = location.getY();
         this.z = location.getZ();
-        this.message = message;
+        this.message = message == null ? "" : message;
         this.status = GriefReportStatus.OPEN;
         this.createdAt = Instant.now();
     }
@@ -68,12 +68,24 @@ public class GriefReport {
         return createdAt;
     }
 
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
+
     public UUID getClosedBy() {
         return closedBy;
     }
 
+    public void setClosedBy(UUID closedBy) {
+        this.closedBy = closedBy;
+    }
+
     public Instant getClosedAt() {
         return closedAt;
+    }
+
+    public void setClosedAt(Instant closedAt) {
+        this.closedAt = closedAt;
     }
 
     public void close(UUID staffUuid) {

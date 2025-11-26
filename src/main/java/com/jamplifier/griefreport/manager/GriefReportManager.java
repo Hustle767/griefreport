@@ -3,6 +3,7 @@ package com.jamplifier.griefreport.manager;
 import com.jamplifier.griefreport.model.GriefReport;
 import com.jamplifier.griefreport.model.GriefReportStatus;
 import com.jamplifier.griefreport.storage.ReportStorage;
+import org.bukkit.Location;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,7 +26,7 @@ public class GriefReportManager {
         }
     }
 
-    public GriefReport createReport(UUID reporter, org.bukkit.Location loc, String message) {
+    public GriefReport createReport(UUID reporter, Location loc, String message) {
         GriefReport report = new GriefReport(nextId++, reporter, loc, message);
         reports.put(report.getId(), report);
         storage.save(report);
@@ -41,6 +42,21 @@ public class GriefReportManager {
                 .filter(r -> r.getStatus() != GriefReportStatus.CLOSED)
                 .sorted(Comparator.comparingInt(GriefReport::getId))
                 .collect(Collectors.toList());
+    }
+
+    public List<GriefReport> getReportsByReporter(UUID reporter) {
+        return reports.values().stream()
+                .filter(r -> r.getReporter().equals(reporter))
+                .sorted(Comparator.comparingInt(GriefReport::getId))
+                .collect(Collectors.toList());
+    }
+
+    public Optional<GriefReport> getLastReportFor(UUID reporter) {
+        return getReportsByReporter(reporter).stream().reduce((first, second) -> second);
+    }
+
+    public void save(GriefReport report) {
+        storage.save(report);
     }
 
     public void saveAll() {

@@ -7,12 +7,48 @@ discord-webhook-url: ""
 # Should staff be alerted in-game when a new grief report is created?
 in-game-staff-alerts: true
 
-# Permission that will receive in-game alerts (online players).
-staff-alert-permission: "griefreport.staff"
-
-# Format for the in-game staff alert.
-# (Only used once we wire up MessageUtil/MiniMessage)
-staff-alert-format: "<red>[GriefReport]</red> <yellow>New report #<id> by <player> at <world> <x>, <y>, <z></yellow>"
-
 # Whether to log all actions (create/close/etc.) to a log file later.
 enable-history-logging: true
+
+messages:
+  # Used as <prefix> placeholder in other messages (MiniMessage).
+  prefix: "<gray>[<red>GriefReport</red>]</gray> "
+
+  no-permission: "<red>You don't have permission to do that.</red>"
+  not-a-number: "<red>'<input>' is not a valid report ID.</red>"
+  report-not-found: "<red>No report found with ID <id>.</red>"
+
+  # /grief report
+  report-created: "<prefix><green>Your grief report has been created with ID <id>.</green>"
+  report-created-with-message: "<prefix><green>Your grief report (#<id>) has been created.</green> <gray>Message:</gray> <yellow><message></yellow>"
+
+  # Staff alert for new report
+  staff-report-alert: "<prefix><yellow>New report #<id> by <player> at <world> <x>, <y>, <z></yellow><gray>: <message></gray>"
+
+  # /grief status
+  status-console-requires-id: "<red>Console must specify an ID: /grief status <id>.</red>"
+  status-no-self: "<prefix><yellow>You have no grief reports.</yellow>"
+  status-header: "<prefix><gray>Status for report #<id>:</gray> <status>"
+  status-open: "<green>OPEN</green> at <world> <x>, <y>, <z>"
+  status-in-progress: "<gold>IN PROGRESS</gold> at <world> <x>, <y>, <z>"
+  status-closed: "<red>CLOSED</red> by <closed_by> on <closed_at>"
+
+  # /grief list
+  list-header: "<prefix><yellow>Open grief reports:</yellow>"
+  list-empty: "<prefix><green>No open grief reports.</green>"
+  list-entry: "<gray>#<id> - <status> - <world> <x>, <y>, <z> - <player> - <message></gray>"
+
+  # /grief close
+  close-success: "<prefix><green>Closed report #<id>.</green>"
+  close-already-closed: "<prefix><yellow>Report #<id> is already closed.</yellow>"
+  close-broadcast: "<prefix><yellow><staff> closed report #<id>.</yellow>"
+
+  # /grief teleport
+  teleport-only-player: "<red>Only players can use this.</red>"
+  teleport-world-missing: "<prefix><red>World '<world>' is not loaded.</red>"
+  teleported: "<prefix><green>Teleported to report #<id>.</green>"
+  reload-start: "<prefix><yellow>Reloading GriefReport config...</yellow>"
+  reload-done: "<prefix><green>GriefReport config reloaded.</green>"
+
+  # Misc
+  usage-main: "<yellow>Usage:</yellow> /grief <report|status|close|teleport|list>"

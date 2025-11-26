@@ -24,7 +24,6 @@ public final class GriefReportPlugin extends JavaPlugin {
         ReportStorage storage = new YamlReportStorage(this);
         this.reportManager = new GriefReportManager(storage);
 
-        // Discord setup can be enabled/disabled via config later
         this.discordNotifier = new WebhookDiscordNotifier(this);
 
         GriefCommand griefCommand = new GriefCommand(this);
@@ -32,12 +31,14 @@ public final class GriefReportPlugin extends JavaPlugin {
         getCommand("grief").setTabCompleter(griefCommand);
     }
 
+
     @Override
     public void onDisable() {
         if (reportManager != null) {
             reportManager.saveAll();
         }
     }
+    
 
     public static GriefReportPlugin getInstance() {
         return instance;
@@ -50,4 +51,10 @@ public final class GriefReportPlugin extends JavaPlugin {
     public DiscordNotifier getDiscordNotifier() {
         return discordNotifier;
     }
+    
+    public void reloadPluginConfig() {
+        reloadConfig();
+        this.discordNotifier = new WebhookDiscordNotifier(this);
+    }
+
 }

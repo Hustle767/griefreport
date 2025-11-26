@@ -8,7 +8,7 @@ description: Simple grief report system with in-game and Discord alerts.
 commands:
   grief:
     description: Grief report commands.
-    usage: "/grief <report|status|close|teleport|list>"
+    usage: "/grief <report|status|close|teleport|list|reload>"
     aliases: [griefreport, gr]
     permission: griefreport.use
 
@@ -23,4 +23,8 @@ permissions:
 
   griefreport.teleport:
     description: Allows staff to teleport to a grief report location.
+    default: op
+
+  griefreport.reload:
+    description: Allows reloading the GriefReport configuration.
     default: op
