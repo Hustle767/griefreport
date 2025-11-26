@@ -80,7 +80,7 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
         }
 
         Location loc = player.getLocation();
-        GriefReport report = reportManager.createReport(player.getUniqueId(), loc, message);
+        GriefReport report = reportManager.createReport(player.getUniqueId(),player.getName(), loc, message);
 
         TagResolver[] placeholders = new TagResolver[]{
                 Placeholder.unparsed("id", String.valueOf(report.getId())),
@@ -93,8 +93,6 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
             MessageUtil.send(player, "report-created-with-message", placeholders);
         }
 
-        // In-game staff alert
-     // In-game staff alert
         if (plugin.getConfig().getBoolean("in-game-staff-alerts", true)) {
             TagResolver[] staffResolvers = new TagResolver[]{
                     Placeholder.unparsed("id", String.valueOf(report.getId())),
@@ -142,11 +140,10 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        // No ID -> if player: use ALL their open reports if > 1
         if (sender instanceof Player player) {
             var all = reportManager.getReportsByReporter(player.getUniqueId());
 
-            // Filter to non-closed
+
             List<GriefReport> open = all.stream()
                     .filter(r -> r.getStatus() != GriefReportStatus.CLOSED)
                     .toList();
@@ -161,7 +158,7 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
                 return;
             }
 
-            // Multiple open reports -> list them
+      
             MessageUtil.send(sender, "status-multiple-header");
 
             for (GriefReport report : open) {
@@ -191,7 +188,7 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
                         Placeholder.unparsed("message", msg));
             }
         } else {
-            // Console must specify an ID
+      
             MessageUtil.send(sender, "status-console-requires-id");
         }
     }
@@ -209,12 +206,12 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
                     ? dateFormatter.format(report.getClosedAt())
                     : "unknown";
 
-            // header line
+          
             MessageUtil.send(sender, "status-header",
                     Placeholder.unparsed("id", String.valueOf(report.getId())),
                     Placeholder.parsed("status", "<red>CLOSED</red>"));
 
-            // details line
+       
             MessageUtil.send(sender, "status-closed",
                     Placeholder.unparsed("world", report.getWorldName()),
                     Placeholder.unparsed("x", String.valueOf(x)),
@@ -275,9 +272,9 @@ public class GriefCommand implements CommandExecutor, TabCompleter {
 
         // mark closed
         if (sender instanceof Player p) {
-            report.close(p.getUniqueId());
+        	report.close(p.getUniqueId(), p.getName());
         } else {
-            report.close(null);
+        	report.close(null, sender.getName());
         }
 
         reportManager.save(report);

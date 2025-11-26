@@ -2,7 +2,26 @@
 
 # Discord webhook URL for sending new/closed report notifications.
 # Leave blank to disable Discord integration.
-discord-webhook-url: ""
+discord:
+  # Master toggle
+  enabled: true
+
+  # Webhook URL for sending new/closed report notifications.
+  webhook-url: ""
+
+  # Username shown in the webhook
+  username: "GriefReport"
+
+  # Optional avatar image for the webhook bot
+  avatar-url: ""  # e.g. "https://example.com/griefreport.png"
+
+  # Optional role to ping when a new report is created (role ID, not name)
+  mention-role-id: ""
+  mention-enabled: false
+
+  # Embed colors (decimal RGB – 16711680 = red, 65280 = green)
+  color-new: 16711680
+  color-closed: 65280
 
 # Should staff be alerted in-game when a new grief report is created?
 in-game-staff-alerts: true
@@ -54,6 +73,6 @@ messages:
   reload-done: "<prefix><green>GriefReport config reloaded.</green>"
 
   # Misc
-  usage-main: "<yellow>Usage:</yellow> /grief <report|status|close|teleport|list>"
+  usage-main: "<yellow>Usage:</yellow> /grief <report|status|list>"
   staff-report-alert-hover: "<gray>Click to teleport to report #<id>.</gray>"
 

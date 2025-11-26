@@ -3,6 +3,7 @@ package com.jamplifier.griefreport.storage;
 import com.jamplifier.griefreport.GriefReportPlugin;
 import com.jamplifier.griefreport.model.GriefReport;
 import com.jamplifier.griefreport.model.GriefReportStatus;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
@@ -39,6 +40,7 @@ public class YamlReportStorage implements ReportStorage {
                 int id = Integer.parseInt(key);
 
                 String reporterStr = config.getString(key + ".reporter");
+                String reporterName = config.getString(key + ".reporterName");
                 String worldName = config.getString(key + ".world");
                 double x = config.getDouble(key + ".x");
                 double y = config.getDouble(key + ".y");
@@ -51,9 +53,15 @@ public class YamlReportStorage implements ReportStorage {
                     continue;
                 }
 
+                if (reporterName == null) {
+                    // Backwards compat: resolve once on main thread
+                    reporterName = Bukkit.getOfflinePlayer(UUID.fromString(reporterStr)).getName();
+                }
+
                 GriefReport report = new GriefReport(
                         id,
                         UUID.fromString(reporterStr),
+                        reporterName,
                         worldName,
                         x,
                         y,
@@ -76,6 +84,9 @@ public class YamlReportStorage implements ReportStorage {
                     report.setClosedBy(UUID.fromString(closedByStr));
                 }
 
+                String closedByName = config.getString(key + ".closedByName");
+                report.setClosedByName(closedByName);
+
                 String closedAtStr = config.getString(key + ".closedAt");
                 if (closedAtStr != null) {
                     report.setClosedAt(Instant.parse(closedAtStr));
@@ -93,6 +104,7 @@ public class YamlReportStorage implements ReportStorage {
         String key = String.valueOf(report.getId());
 
         config.set(key + ".reporter", report.getReporter().toString());
+        config.set(key + ".reporterName", report.getReporterName());
         config.set(key + ".world", report.getWorldName());
         config.set(key + ".x", report.getX());
         config.set(key + ".y", report.getY());
@@ -108,6 +120,9 @@ public class YamlReportStorage implements ReportStorage {
         }
         if (report.getClosedBy() != null) {
             config.set(key + ".closedBy", report.getClosedBy().toString());
+        }
+        if (report.getClosedByName() != null) {
+            config.set(key + ".closedByName", report.getClosedByName());
         }
         if (report.getClosedAt() != null) {
             config.set(key + ".closedAt", report.getClosedAt().toString());

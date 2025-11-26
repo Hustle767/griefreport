@@ -54,7 +54,12 @@ public final class GriefReportPlugin extends JavaPlugin {
     
     public void reloadPluginConfig() {
         reloadConfig();
-        this.discordNotifier = new WebhookDiscordNotifier(this);
+        if (this.discordNotifier instanceof WebhookDiscordNotifier notifier) {
+            notifier.reload();
+        } else {
+            this.discordNotifier = new WebhookDiscordNotifier(this);
+        }
     }
+
 
 }

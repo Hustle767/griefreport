@@ -11,6 +11,7 @@ public class GriefReport {
 
     private final int id;
     private final UUID reporter;
+    private final String reporterName;
     private final String worldName;
     private final double x;
     private final double y;
@@ -22,13 +23,15 @@ public class GriefReport {
     private GriefReportStatus status;
     private Instant createdAt;
     private UUID closedBy;
+    private String closedByName;
     private Instant closedAt;
 
     // Used when creating a fresh report from a Location
-    public GriefReport(int id, UUID reporter, Location location, String message) {
+    public GriefReport(int id, UUID reporter, String reporterName, Location location, String message) {
         this(
                 id,
                 reporter,
+                reporterName,
                 location.getWorld().getName(),
                 location.getX(),
                 location.getY(),
@@ -43,6 +46,7 @@ public class GriefReport {
     public GriefReport(
             int id,
             UUID reporter,
+            String reporterName,
             String worldName,
             double x,
             double y,
@@ -53,6 +57,7 @@ public class GriefReport {
     ) {
         this.id = id;
         this.reporter = reporter;
+        this.reporterName = reporterName == null ? "Unknown" : reporterName;
         this.worldName = worldName;
         this.x = x;
         this.y = y;
@@ -70,6 +75,10 @@ public class GriefReport {
 
     public UUID getReporter() {
         return reporter;
+    }
+
+    public String getReporterName() {
+        return reporterName;
     }
 
     public String getWorldName() {
@@ -130,6 +139,14 @@ public class GriefReport {
         this.closedBy = closedBy;
     }
 
+    public String getClosedByName() {
+        return closedByName;
+    }
+
+    public void setClosedByName(String closedByName) {
+        this.closedByName = closedByName;
+    }
+
     public Instant getClosedAt() {
         return closedAt;
     }
@@ -138,9 +155,10 @@ public class GriefReport {
         this.closedAt = closedAt;
     }
 
-    public void close(UUID staffUuid) {
+    public void close(UUID staffUuid, String staffName) {
         this.status = GriefReportStatus.CLOSED;
         this.closedBy = staffUuid;
+        this.closedByName = staffName == null ? "Unknown" : staffName;
         this.closedAt = Instant.now();
     }
 }

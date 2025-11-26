@@ -26,8 +26,8 @@ public class GriefReportManager {
         }
     }
 
-    public GriefReport createReport(UUID reporter, Location loc, String message) {
-        GriefReport report = new GriefReport(nextId++, reporter, loc, message);
+    public GriefReport createReport(UUID reporter, String reporterName, Location loc, String message) {
+        GriefReport report = new GriefReport(nextId++, reporter, reporterName, loc, message);
         reports.put(report.getId(), report);
         storage.save(report);
         return report;
