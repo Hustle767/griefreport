@@ -1,0 +1,26 @@
+name: GriefReport
+main: com.jamplifier.griefreport.GriefReportPlugin
+version: 1.0.0
+api-version: '1.21'
+author: Jamplifier
+description: Simple grief report system with in-game and Discord alerts.
+
+commands:
+  grief:
+    description: Grief report commands.
+    usage: "/grief <report|status|close|teleport|list>"
+    aliases: [griefreport, gr]
+    permission: griefreport.use
+
+permissions:
+  griefreport.use:
+    description: Allows players to create and view their own grief reports.
+    default: true
+
+  griefreport.staff:
+    description: Allows staff to manage grief reports.
+    default: op
+
+  griefreport.teleport:
+    description: Allows staff to teleport to a grief report location.
+    default: op

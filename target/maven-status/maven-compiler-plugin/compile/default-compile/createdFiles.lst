@@ -1,0 +1,11 @@
+com\jamplifier\griefreport\storage\ReportStorage.class
+com\jamplifier\griefreport\GriefReportPlugin.class
+com\jamplifier\griefreport\manager\GriefReportManager.class
+com\jamplifier\griefreport\util\MessageUtil.class
+com\jamplifier\griefreport\util\IdGenerator.class
+com\jamplifier\griefreport\command\GriefCommand.class
+com\jamplifier\griefreport\integration\DiscordNotifier.class
+com\jamplifier\griefreport\model\GriefReportStatus.class
+com\jamplifier\griefreport\storage\YamlReportStorage.class
+com\jamplifier\griefreport\integration\WebhookDiscordNotifier.class
+com\jamplifier\griefreport\model\GriefReport.class

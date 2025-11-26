@@ -1,0 +1,18 @@
+# GriefReport Configuration
+
+# Discord webhook URL for sending new/closed report notifications.
+# Leave blank to disable Discord integration.
+discord-webhook-url: ""
+
+# Should staff be alerted in-game when a new grief report is created?
+in-game-staff-alerts: true
+
+# Permission that will receive in-game alerts (online players).
+staff-alert-permission: "griefreport.staff"
+
+# Format for the in-game staff alert.
+# (Only used once we wire up MessageUtil/MiniMessage)
+staff-alert-format: "<red>[GriefReport]</red> <yellow>New report #<id> by <player> at <world> <x>, <y>, <z></yellow>"
+
+# Whether to log all actions (create/close/etc.) to a log file later.
+enable-history-logging: true
